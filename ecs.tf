@@ -51,6 +51,24 @@ server {
     }
 }
 EOF
+
+  default_autoscaling_capacity_providers = {
+    "${var.name}-asg" = {
+      auto_scaling_group_arn         = module.autoscaling.autoscaling_group_arn
+      managed_termination_protection = "ENABLED"
+
+      managed_scaling = {
+        maximum_scaling_step_size = 2
+        minimum_scaling_step_size = 1
+        status                    = "ENABLED"
+        target_capacity           = 100
+      }
+
+      default_capacity_provider_strategy = {
+        weight = 0
+      }
+    }
+  }
 }
 
 data "aws_ec2_instance_type" "cluster_autoscaler" {
@@ -82,23 +100,7 @@ module "ecs_cluster" {
 
   # Capacity providers
   default_capacity_provider_use_fargate = true
-  autoscaling_capacity_providers = try(var.cluster.autoscaling_capacity_providers, {
-    try(var.autoscaling.name, "${var.name}-asg") = {
-      auto_scaling_group_arn         = module.autoscaling.autoscaling_group_arn
-      managed_termination_protection = "ENABLED"
-
-      managed_scaling = {
-        maximum_scaling_step_size = 2
-        minimum_scaling_step_size = 1
-        status                    = "ENABLED"
-        target_capacity           = 100
-      }
-
-      default_capacity_provider_strategy = {
-        weight = 0
-      }
-    }
-  })
+  autoscaling_capacity_providers = local.default_autoscaling_capacity_providers
   fargate_capacity_providers = try(var.cluster.fargate_capacity_providers, {})
 
   tags = var.tags
