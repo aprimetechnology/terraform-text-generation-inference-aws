@@ -32,9 +32,9 @@ module "text_generation_inference" {
 
   name = "${local.name}-tgi"
 
-  text_generation_inference_version = "2.0.3"
   text_generation_inference = {
-    port = local.text_generation_inference_port
+    port          = local.text_generation_inference_port
+    image_version = "2.0.3"
   }
   nginx = {
     port = local.nginx_port

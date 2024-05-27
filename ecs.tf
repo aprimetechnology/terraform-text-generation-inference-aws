@@ -8,7 +8,7 @@ locals {
     containerPath = local.mount_path
     sourceVolume  = "efs"
     readOnly      = false
-  }] : try(var.text_generation_inference.mount_points, [])
+  }] : var.text_generation_inference.mount_points
   nginx_mount_points = concat(
     [{
       containerPath = "/etc/nginx/conf.d"
@@ -43,7 +43,7 @@ server {
     }
 
     location / {
-        proxy_pass http://localhost:${local.text_generation_inference_port}/;
+        proxy_pass http://localhost:${var.text_generation_inference.port}/;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -100,8 +100,8 @@ module "ecs_cluster" {
 
   # Capacity providers
   default_capacity_provider_use_fargate = true
-  autoscaling_capacity_providers = local.default_autoscaling_capacity_providers
-  fargate_capacity_providers = try(var.cluster.fargate_capacity_providers, {})
+  autoscaling_capacity_providers        = local.default_autoscaling_capacity_providers
+  fargate_capacity_providers            = try(var.cluster.fargate_capacity_providers, {})
 
   tags = var.tags
 }
@@ -296,16 +296,16 @@ module "ecs_service" {
         cloudwatch_log_group_kms_key_id        = try(var.nginx.cloudwatch_log_group_kms_key_id, null)
       },
       text_generation_inference = {
-        command                 = try(var.text_generation_inference.command, [])
-        cpu                     = try(var.text_generation_inference.cpu, local.task_cpu)
-        dependencies            = try(var.text_generation_inference.dependencies, []) # depends_on is a reserved word
-        disable_networking      = try(var.text_generation_inference.disable_networking, null)
-        dns_search_domains      = try(var.text_generation_inference.dns_search_domains, [])
-        dns_servers             = try(var.text_generation_inference.dns_servers, [])
-        docker_labels           = try(var.text_generation_inference.docker_labels, {})
-        docker_security_options = try(var.text_generation_inference.docker_security_options, [])
-        enable_execute_command  = try(var.text_generation_inference.enable_execute_command, try(var.service.enable_execute_command, false))
-        entrypoint              = try(var.text_generation_inference.entrypoint, [])
+        command                 = var.text_generation_inference.command
+        cpu                     = var.text_generation_inference.cpu != null ? var.text_generation_inference.cpu : local.task_cpu
+        dependencies            = var.text_generation_inference.dependencies
+        disable_networking      = var.text_generation_inference.disable_networking
+        dns_search_domains      = var.text_generation_inference.dns_search_domains
+        dns_servers             = var.text_generation_inference.dns_servers
+        docker_labels           = var.text_generation_inference.docker_labels
+        docker_security_options = var.text_generation_inference.docker_security_options
+        enable_execute_command  = var.text_generation_inference.enable_execute_command
+        entrypoint              = var.text_generation_inference.entrypoint
         environment = concat(
           [
             {
@@ -339,21 +339,21 @@ module "ecs_service" {
           ] : [],
           lookup(var.text_generation_inference, "environment", [])
         )
-        environment_files      = try(var.text_generation_inference.environment_files, [])
-        essential              = try(var.text_generation_inference.essential, true)
-        extra_hosts            = try(var.text_generation_inference.extra_hosts, [])
-        firelens_configuration = try(var.text_generation_inference.firelens_configuration, {})
-        health_check           = try(var.text_generation_inference.health_check, {})
-        hostname               = try(var.text_generation_inference.hostname, null)
-        image                  = try(var.text_generation_inference.image, "ghcr.io/huggingface/text-generation-inference:${var.text_generation_inference_version}")
-        interactive            = try(var.text_generation_inference.interactive, false)
-        links                  = try(var.text_generation_inference.links, [])
-        linux_parameters = try(var.text_generation_inference.linux_parameters, {
+        environment_files      = var.text_generation_inference.environment_files
+        essential              = var.text_generation_inference.essential
+        extra_hosts            = var.text_generation_inference.extra_hosts
+        firelens_configuration = var.text_generation_inference.firelens_configuration
+        health_check           = var.text_generation_inference.health_check
+        hostname               = var.text_generation_inference.hostname
+        image                  = "${var.text_generation_inference.image_repo}:${var.text_generation_inference.image_version}"
+        interactive            = var.text_generation_inference.interactive
+        links                  = var.text_generation_inference.links
+        linux_parameters = length(var.text_generation_inference.linux_parameters) > 0 ? var.text_generation_inference.linux_parameters : {
           sharedMemorySize = local.task_memory_shared
-        })
-        log_configuration  = lookup(var.text_generation_inference, "log_configuration", {})
-        memory             = try(var.text_generation_inference.memory, local.task_memory)
-        memory_reservation = try(var.text_generation_inference.memory_reservation, local.task_memory / 2)
+        }
+        log_configuration  = var.text_generation_inference.log_configuration
+        memory             = var.text_generation_inference.memory != null ? var.text_generation_inference.memory : local.task_memory
+        memory_reservation = var.text_generation_inference.memory_reservation != null ? var.text_generation_inference.memory_reservation : local.task_memory / 2
         mount_points       = local.mount_points
         name               = "text_generation_inference"
         port_mappings = [{
@@ -362,10 +362,10 @@ module "ecs_service" {
           hostPort      = local.text_generation_inference_port
           protocol      = "tcp"
         }]
-        privileged               = try(var.text_generation_inference.privileged, false)
-        pseudo_terminal          = try(var.text_generation_inference.pseudo_terminal, false)
-        readonly_root_filesystem = try(var.text_generation_inference.readonly_root_filesystem, false)
-        repository_credentials   = try(var.text_generation_inference.repository_credentials, {})
+        privileged               = var.text_generation_inference.privileged
+        pseudo_terminal          = var.text_generation_inference.pseudo_terminal
+        readonly_root_filesystem = var.text_generation_inference.readonly_root_filesystem
+        repository_credentials   = var.text_generation_inference.repository_credentials
         resource_requirements = concat(
           [
             {
@@ -375,22 +375,22 @@ module "ecs_service" {
           ],
           lookup(var.text_generation_inference, "resource_requirements", [])
         )
-        secrets           = try(var.text_generation_inference.secrets, [])
-        start_timeout     = try(var.text_generation_inference.start_timeout, 30)
-        stop_timeout      = try(var.text_generation_inference.stop_timeout, 120)
-        system_controls   = try(var.text_generation_inference.system_controls, [])
-        ulimits           = try(var.text_generation_inference.ulimits, [])
-        user              = try(var.text_generation_inference.user, "${var.text_generation_inference_uid}:${var.text_generation_inference_gid}")
-        volumes_from      = try(var.text_generation_inference.volumes_from, [])
-        working_directory = try(var.text_generation_inference.working_directory, null)
+        secrets           = var.text_generation_inference.secrets
+        start_timeout     = var.text_generation_inference.start_timeout
+        stop_timeout      = var.text_generation_inference.stop_timeout
+        system_controls   = var.text_generation_inference.system_controls
+        ulimits           = var.text_generation_inference.ulimits
+        user              = var.text_generation_inference.user != null ? var.text_generation_inference.user : "${var.text_generation_inference_uid}:${var.text_generation_inference_gid}"
+        volumes_from      = var.text_generation_inference.volumes_from
+        working_directory = var.text_generation_inference.working_directory
 
         # CloudWatch Log Group
         service                                = var.name
-        enable_cloudwatch_logging              = try(var.text_generation_inference.enable_cloudwatch_logging, true)
-        create_cloudwatch_log_group            = try(var.text_generation_inference.create_cloudwatch_log_group, true)
-        cloudwatch_log_group_use_name_prefix   = try(var.text_generation_inference.cloudwatch_log_group_use_name_prefix, true)
-        cloudwatch_log_group_retention_in_days = try(var.text_generation_inference.cloudwatch_log_group_retention_in_days, 14)
-        cloudwatch_log_group_kms_key_id        = try(var.text_generation_inference.cloudwatch_log_group_kms_key_id, null)
+        enable_cloudwatch_logging              = var.text_generation_inference.enable_cloudwatch_logging
+        create_cloudwatch_log_group            = var.text_generation_inference.create_cloudwatch_log_group
+        cloudwatch_log_group_use_name_prefix   = var.text_generation_inference.cloudwatch_log_group_use_name_prefix
+        cloudwatch_log_group_retention_in_days = var.text_generation_inference.cloudwatch_log_group_retention_in_days
+        cloudwatch_log_group_kms_key_id        = var.text_generation_inference.cloudwatch_log_group_kms_key_id
       },
     },
     lookup(var.service, "container_definitions", {})
