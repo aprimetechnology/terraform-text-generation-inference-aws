@@ -32,6 +32,9 @@ module "text_generation_inference" {
 
   name = "${local.name}-tgi"
 
+  text_generation_inference_discovery_name      = local.text_generation_inference_discovery_name
+  text_generation_inference_discovery_namespace = aws_service_discovery_http_namespace.this.name
+
   text_generation_inference = {
     port          = local.text_generation_inference_port
     image_version = "2.0.3"
@@ -42,7 +45,8 @@ module "text_generation_inference" {
   instance_type = "g4dn.2xlarge"
   quantize      = "bitsandbytes"
 
-  vpc_id = module.vpc.vpc_id
+  vpc_id             = module.vpc.vpc_id
+  availability_zones = local.azs
 
   # ECS
   service = {
@@ -62,6 +66,7 @@ module "text_generation_inference" {
     }
   }
   service_subnets    = module.vpc.private_subnets
+  alb_subnets        = module.vpc.public_subnets
   use_spot_instances = true
 
   # ALB
@@ -69,6 +74,10 @@ module "text_generation_inference" {
 
   # ACM
   create_certificate = false
+
+  # route 53
+  route53_zone_id   = data.aws_route53_zone.this.zone_id
+  route53_zone_name = data.aws_route53_zone.this.name
 
   # EFS
   enable_efs = true
@@ -87,65 +96,6 @@ module "text_generation_inference" {
 # Open WebUI
 ##############################################################
 
-module "open_webui" {
-  source = "../../modules/terraform-open-webui-aws"
-
-  name = "${local.name}-open-webui"
-
-  open_webui_version = "v0.1.125"
-
-  vpc_id              = module.vpc.vpc_id
-  openai_api_base_url = "http://${local.text_generation_inference_discovery_name}.${aws_service_discovery_http_namespace.this.name}/v1"
-  openai_api_key      = "fake"
-
-  # ECS
-  create_cluster = false
-  cluster_arn    = module.text_generation_inference.cluster_arn
-  service = {
-    service_connect_configuration = {
-      enabled   = true
-      namespace = aws_service_discovery_http_namespace.this.arn
-    }
-  }
-  open_webui = {
-    # Note this is a workaround for the Open WebUI image not building with
-    # non-root user support by default, see:
-    # https://github.com/open-webui/open-webui/pull/2322
-    image = "ghcr.io/pfacheris/open-webui:git-e6cb207"
-    environment = [
-      {
-        name  = "ENABLE_LITELLM"
-        value = "False"
-      }
-    ]
-  }
-  open_webui_uid  = 100
-  open_webui_gid  = 1000
-  service_subnets = module.vpc.private_subnets
-
-  # ALB
-  create_alb  = true
-  alb_subnets = module.vpc.public_subnets
-  alb = {
-    enable_deletion_protection = false
-  }
-
-  # ACM
-  certificate_domain_name = "${local.name}-open-webui.${data.aws_route53_zone.this.name}"
-  route53_zone_id         = data.aws_route53_zone.this.zone_id
-
-  # EFS
-  enable_efs = true
-  efs = {
-    mount_targets = {
-      for idx, az in local.azs : az => {
-        subnet_id = module.vpc.private_subnets[idx]
-      }
-    }
-  }
-
-  tags = local.tags
-}
 
 ################################################################################
 # VPC
@@ -195,6 +145,6 @@ resource "aws_security_group_rule" "allow_open_webui_to_text_generation_inferenc
   from_port                = local.nginx_port
   to_port                  = local.nginx_port
   protocol                 = "tcp"
-  source_security_group_id = module.open_webui.ecs_service_security_group_id
+  source_security_group_id = module.text_generation_inference.open_webui_ecs_service_security_group_id
   security_group_id        = module.text_generation_inference.ecs_service_security_group_id
 }

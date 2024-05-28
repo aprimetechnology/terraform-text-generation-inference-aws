@@ -9,3 +9,7 @@ output "service_name" {
 output "ecs_service_security_group_id" {
   value = module.ecs_service.security_group_id
 }
+
+output "open_webui_ecs_service_security_group_id" {
+  value = module.open_webui.ecs_service_security_group_id
+}

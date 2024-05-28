@@ -19,6 +19,21 @@ variable "vpc_id" {
   description = "ID of the VPC in which the resources will be created"
 }
 
+variable "availability_zones" {
+  type        = list(string)
+  description = "The availability_zones to create objects in."
+}
+
+variable "text_generation_inference_discovery_name" {
+  type        = string
+  description = "Name of text-generation-inference used for service discovery"
+}
+
+variable "text_generation_inference_discovery_namespace" {
+  type        = string
+  description = "Namespace of text-generation-inference used for service discovery"
+}
+
 variable "text_generation_inference" {
   description = "Configuration for the text generation inference"
   type = object({
@@ -211,6 +226,12 @@ variable "route53_record_name" {
   type        = string
   description = "Name of Route53 record to create ACM certificate in and main A-record. If not specified var.name will be used. Required if create_route53_records is true"
   default     = null
+}
+
+variable "route53_zone_name" {
+  type        = string
+  description = "Name of the Route53 zone in which to create records. Required if create_route53_records is true"
+  default     = ""
 }
 
 variable "route53_zone_id" {
