@@ -20,9 +20,54 @@ variable "vpc_id" {
 }
 
 variable "text_generation_inference" {
-  description = "Map of values passed to TextGenerationInference container definition. See the [ECS container definition module](https://github.com/terraform-aws-modules/terraform-aws-ecs/tree/master/modules/container-definition) for full list of arguments supported"
-  type        = any
-  default     = {}
+  description = "Configuration for the text generation inference"
+  type = object({
+    mount_points                           = optional(list(any), [])
+    command                                = optional(list(string), [])
+    cpu                                    = optional(number, null)
+    dependencies                           = optional(list(map(string)), []) # depends_on is a reserved word
+    disable_networking                     = optional(bool, null)
+    dns_search_domains                     = optional(list(string), [])
+    dns_servers                            = optional(list(string), [])
+    docker_labels                          = optional(map(string), {})
+    docker_security_options                = optional(list(string), [])
+    enable_execute_command                 = optional(bool, false)
+    entrypoint                             = optional(list(string), [])
+    environment                            = optional(list(object({ name = string, value = string })), [])
+    environment_files                      = optional(list(object({ value = string, type = string })), [])
+    essential                              = optional(bool, true)
+    extra_hosts                            = optional(list(object({ hostname = string, ipAddress = string })), [])
+    firelens_configuration                 = optional(map(string), {})
+    health_check                           = optional(map(string), {})
+    hostname                               = optional(string, null)
+    image_repo                             = optional(string, "ghcr.io/huggingface/text-generation-inference")
+    image_version                          = optional(string, "latest")
+    interactive                            = optional(bool, false)
+    links                                  = optional(list(string), [])
+    linux_parameters                       = optional(any, {})
+    log_configuration                      = optional(map(string), {})
+    memory                                 = optional(number, null)
+    memory_reservation                     = optional(number, null)
+    privileged                             = optional(bool, false)
+    pseudo_terminal                        = optional(bool, false)
+    readonly_root_filesystem               = optional(bool, false)
+    repository_credentials                 = optional(map(string), {})
+    resource_requirements                  = optional(list(object({ type = string, value = string })), [])
+    secrets                                = optional(list(object({ name = string, valueFrom = string })), [])
+    start_timeout                          = optional(number, 30)
+    stop_timeout                           = optional(number, 120)
+    system_controls                        = optional(list(map(string)), [])
+    ulimits                                = optional(list(map(string)), [])
+    user                                   = optional(string, null)
+    volumes_from                           = optional(list(map(string)), [])
+    working_directory                      = optional(string, null)
+    enable_cloudwatch_logging              = optional(bool, true)
+    create_cloudwatch_log_group            = optional(bool, true)
+    cloudwatch_log_group_use_name_prefix   = optional(bool, true)
+    cloudwatch_log_group_retention_in_days = optional(number, 14)
+    cloudwatch_log_group_kms_key_id        = optional(string, null)
+    port                                   = optional(number, 11434)
+  })
 }
 
 variable "init_nginx" {
@@ -82,12 +127,6 @@ variable "dtype" {
     condition     = var.dtype == null || can(regex("^(float16|bfloat16)$", var.dtype))
     error_message = "dtype must be one of either 'float16' or 'bfloat16'"
   }
-}
-
-variable "text_generation_inference_version" {
-  description = "Version of the Text Generation Inference image to use"
-  type        = string
-  default     = "latest"
 }
 
 ################################################################################
