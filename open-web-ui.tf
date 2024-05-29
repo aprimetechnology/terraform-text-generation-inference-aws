@@ -4,6 +4,7 @@
 
 module "open_webui" {
   source = "./modules/terraform-open-webui-aws"
+  count  = var.create_ui ? 1 : 0
 
   name = "${var.name}-open-webui"
 
@@ -61,4 +62,14 @@ module "open_webui" {
   }
 
   tags = var.tags
+}
+
+resource "aws_security_group_rule" "allow_open_webui_to_text_generation_inference" {
+  count                    = var.create_ui ? 1 : 0
+  type                     = "ingress"
+  from_port                = var.nginx.port
+  to_port                  = var.nginx.port
+  protocol                 = "tcp"
+  source_security_group_id = module.open_webui[0].ecs_service_security_group_id
+  security_group_id        = module.ecs_service.security_group_id
 }

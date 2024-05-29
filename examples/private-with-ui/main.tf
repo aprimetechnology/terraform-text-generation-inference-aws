@@ -135,16 +135,3 @@ resource "aws_service_discovery_http_namespace" "this" {
   description = "CloudMap namespace for ${local.name}"
   tags        = local.tags
 }
-
-##############################################################
-# Additional Security Group Rules
-##############################################################
-
-resource "aws_security_group_rule" "allow_open_webui_to_text_generation_inference" {
-  type                     = "ingress"
-  from_port                = local.nginx_port
-  to_port                  = local.nginx_port
-  protocol                 = "tcp"
-  source_security_group_id = module.text_generation_inference.open_webui_ecs_service_security_group_id
-  security_group_id        = module.text_generation_inference.ecs_service_security_group_id
-}

@@ -34,6 +34,13 @@ variable "text_generation_inference_discovery_namespace" {
   description = "Namespace of text-generation-inference used for service discovery"
 }
 
+variable "create_ui" {
+  type        = bool
+  description = "Whether you want to create the open webui"
+  default     = true
+
+}
+
 variable "text_generation_inference" {
   description = "Configuration for the text generation inference"
   type = object({

@@ -11,5 +11,5 @@ output "ecs_service_security_group_id" {
 }
 
 output "open_webui_ecs_service_security_group_id" {
-  value = module.open_webui.ecs_service_security_group_id
+  value = var.create_ui ? module.open_webui[0].ecs_service_security_group_id : null
 }
