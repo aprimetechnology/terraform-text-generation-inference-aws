@@ -84,7 +84,7 @@ module "ecs_service" {
   service_registries            = lookup(var.service, "service_registries", {})
   timeouts                      = try(var.service.timeouts, {})
   triggers                      = try(var.service.triggers, {})
-  wait_for_steady_state         = try(var.service.wait_for_steady_state, null)
+  wait_for_steady_state         = try(var.service.wait_for_steady_state, true)
 
   # Service IAM role
   create_iam_role               = try(var.service.create_iam_role, true)
@@ -247,7 +247,7 @@ module "ecs_service" {
   # Task set
   external_id               = try(var.service.external_id, null)
   scale                     = try(var.service.scale, {})
-  force_delete              = try(var.service.force_delete, null)
+  force_delete              = try(var.service.force_delete, true)
   wait_until_stable         = try(var.service.wait_until_stable, null)
   wait_until_stable_timeout = try(var.service.wait_until_stable_timeout, null)
 
