@@ -52,7 +52,7 @@ module "autoscaling" {
   }
 
   # Required for  managed_termination_protection = "ENABLED"
-  protect_from_scale_in = try(var.autoscaling.protect_from_scale_in, true)
+  protect_from_scale_in = try(var.autoscaling.protect_from_scale_in, false)
 
   # Spot instances
   use_mixed_instances_policy = try(var.autoscaling.use_mixed_instances_policy, false)

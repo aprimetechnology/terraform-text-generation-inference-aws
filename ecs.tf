@@ -55,7 +55,7 @@ EOF
   default_autoscaling_capacity_providers = {
     "${var.name}-asg" = {
       auto_scaling_group_arn         = module.autoscaling.autoscaling_group_arn
-      managed_termination_protection = "ENABLED"
+      managed_termination_protection = "DISABLED"
 
       managed_scaling = {
         maximum_scaling_step_size = 2
