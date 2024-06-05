@@ -81,6 +81,7 @@
 | <a name="input_text_generation_inference_gid"></a> [text\_generation\_inference\_gid](#input\_text\_generation\_inference\_gid) | GID of the text\_generation\_inference user | `number` | `1000` | no |
 | <a name="input_text_generation_inference_uid"></a> [text\_generation\_inference\_uid](#input\_text\_generation\_inference\_uid) | UID of the text\_generation\_inference user | `number` | `100` | no |
 | <a name="input_use_spot_instances"></a> [use\_spot\_instances](#input\_use\_spot\_instances) | Determines whether to use spot instances for the ECS autoscaling group | `bool` | `false` | no |
+| <a name="input_use_ssl_ui"></a> [use\_ssl\_ui](#input\_use\_ssl\_ui) | Create domain + certs for ssl connection to the UI. | `bool` | `true` | no |
 | <a name="input_validate_certificate"></a> [validate\_certificate](#input\_validate\_certificate) | Determines whether to validate ACM certificate using Route53 DNS. If false, certificate will be created but not validated | `bool` | `true` | no |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | ID of the VPC in which the resources will be created | `string` | n/a | yes |
 

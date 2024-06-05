@@ -41,8 +41,11 @@ module "open_webui" {
   service_subnets = var.service_subnets
 
   # ALB
-  create_alb  = true
-  alb_subnets = var.alb_subnets
+  create_alb             = true
+  create_certificate     = var.use_ssl_ui ? true : false
+  create_route53_records = var.use_ssl_ui ? true : false
+  alb_use_https          = var.use_ssl_ui ? true : false
+  alb_subnets            = var.alb_subnets
   alb = {
     enable_deletion_protection = false
   }

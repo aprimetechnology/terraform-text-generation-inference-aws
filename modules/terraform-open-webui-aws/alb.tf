@@ -15,6 +15,53 @@ locals {
       zone_id = var.route53_zone_id
     }
   }
+
+  http_listeners = {
+    http = merge(
+      {
+        port     = 80
+        protocol = "HTTP"
+      },
+      var.alb_http_default_action
+    )
+    https               = null
+    http-https-redirect = null
+  }
+
+  https_listeners = {
+    http = null
+    http-https-redirect = {
+      port     = 80
+      protocol = "HTTP"
+
+      redirect = {
+        port        = "443"
+        protocol    = "HTTPS"
+        status_code = "HTTP_301"
+      }
+    }
+    https = merge(
+      {
+        port            = 443
+        protocol        = "HTTPS"
+        ssl_policy      = try(var.alb.https_listener_ssl_policy, "ELBSecurityPolicy-TLS13-1-2-Res-2021-06")
+        certificate_arn = var.create_certificate ? module.acm.acm_certificate_arn : var.certificate_arn
+      },
+      var.alb_https_default_action,
+      lookup(var.alb, "https_listener", {})
+    )
+  }
+}
+
+# To get terraform to not complain about the maps being different,
+# we have to add null values so we can merge them into one, and then
+# we filter out the values that aren't being used.
+locals {
+  listeners = var.alb_use_https ? local.https_listeners : local.http_listeners
+  filtered_listeners = {
+    for key, value in local.listeners : key => value
+    if value != null
+  }
 }
 
 module "alb" {
@@ -50,29 +97,7 @@ module "alb" {
   default_port     = try(var.alb.default_port, 80)
   default_protocol = try(var.alb.default_protocol, "HTTP")
   listeners = merge(
-    {
-      http-https-redirect = {
-        port     = 80
-        protocol = "HTTP"
-
-        redirect = {
-          port        = "443"
-          protocol    = "HTTPS"
-          status_code = "HTTP_301"
-        }
-      }
-
-      https = merge(
-        {
-          port            = 443
-          protocol        = "HTTPS"
-          ssl_policy      = try(var.alb.https_listener_ssl_policy, "ELBSecurityPolicy-TLS13-1-2-Res-2021-06")
-          certificate_arn = var.create_certificate ? module.acm.acm_certificate_arn : var.certificate_arn
-        },
-        var.alb_https_default_action,
-        lookup(var.alb, "https_listener", {})
-      )
-    },
+    local.filtered_listeners,
     lookup(var.alb, "listeners", {})
   )
 
@@ -111,20 +136,23 @@ module "alb" {
   security_group_description     = try(var.alb.security_group_description, null)
   vpc_id                         = var.vpc_id
   security_group_ingress_rules = lookup(var.alb, "security_group_ingress_rules",
-    {
+    merge({
       http = {
         from_port   = 80
         to_port     = 80
         ip_protocol = "tcp"
         cidr_ipv4   = "0.0.0.0/0"
       }
-      https = {
-        from_port   = 443
-        to_port     = 443
-        ip_protocol = "tcp"
-        cidr_ipv4   = "0.0.0.0/0"
-      }
-    }
+      },
+      var.alb_use_https ? {
+        https = {
+          from_port   = 443
+          to_port     = 443
+          ip_protocol = "tcp"
+          cidr_ipv4   = "0.0.0.0/0"
+        }
+      } : {}
+    )
   )
   security_group_egress_rules = lookup(var.alb, "security_group_egress_rules",
     {

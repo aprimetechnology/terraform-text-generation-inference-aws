@@ -72,6 +72,22 @@ variable "alb" {
   default     = {}
 }
 
+variable "alb_http_default_action" {
+  type        = any
+  description = "Default action for ALB HTTP listener"
+  default = {
+    forward = {
+      target_group_key = "open_webui"
+    }
+  }
+}
+
+variable "alb_use_https" {
+  type        = bool
+  description = "Determines whether to use https for the alb."
+  default     = true
+}
+
 variable "alb_https_default_action" {
   type        = any
   description = "Default action for ALB HTTPS listener"
