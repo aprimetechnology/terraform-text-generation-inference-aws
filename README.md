@@ -89,8 +89,10 @@
 
 | Name | Description |
 |------|-------------|
+| <a name="output_alb_dns_name"></a> [alb\_dns\_name](#output\_alb\_dns\_name) | The DNS name of the load balancer |
 | <a name="output_cluster_arn"></a> [cluster\_arn](#output\_cluster\_arn) | n/a |
 | <a name="output_ecs_service_security_group_id"></a> [ecs\_service\_security\_group\_id](#output\_ecs\_service\_security\_group\_id) | n/a |
 | <a name="output_open_webui_ecs_service_security_group_id"></a> [open\_webui\_ecs\_service\_security\_group\_id](#output\_open\_webui\_ecs\_service\_security\_group\_id) | n/a |
 | <a name="output_service_name"></a> [service\_name](#output\_service\_name) | n/a |
+| <a name="output_ui_url"></a> [ui\_url](#output\_ui\_url) | The UI url if a domain was given |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

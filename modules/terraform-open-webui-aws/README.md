@@ -66,6 +66,7 @@ No resources.
 
 | Name | Description |
 |------|-------------|
+| <a name="output_alb_dns_name"></a> [alb\_dns\_name](#output\_alb\_dns\_name) | The DNS name of the load balancer |
 | <a name="output_cluster_arn"></a> [cluster\_arn](#output\_cluster\_arn) | n/a |
 | <a name="output_ecs_service_security_group_id"></a> [ecs\_service\_security\_group\_id](#output\_ecs\_service\_security\_group\_id) | n/a |
 | <a name="output_service_name"></a> [service\_name](#output\_service\_name) | n/a |
