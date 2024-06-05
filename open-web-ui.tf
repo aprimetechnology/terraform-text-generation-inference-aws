@@ -2,11 +2,19 @@
 # Open WebUI
 ##############################################################
 
+locals {
+  name = "${var.name}-open-webui"
+}
+
+locals {
+  domain_name = "${local.name}.${var.route53_zone_name}"
+}
+
 module "open_webui" {
   source = "./modules/terraform-open-webui-aws"
   count  = var.create_ui ? 1 : 0
 
-  name = "${var.name}-open-webui"
+  name = local.name
 
   open_webui_version = "v0.1.125"
 
@@ -41,14 +49,17 @@ module "open_webui" {
   service_subnets = var.service_subnets
 
   # ALB
-  create_alb  = true
-  alb_subnets = var.alb_subnets
+  create_alb             = true
+  create_certificate     = var.use_ssl_ui ? true : false
+  create_route53_records = var.use_ssl_ui ? true : false
+  alb_use_https          = var.use_ssl_ui ? true : false
+  alb_subnets            = var.alb_subnets
   alb = {
     enable_deletion_protection = false
   }
 
   # ACM
-  certificate_domain_name = "${var.name}-open-webui.${var.route53_zone_name}"
+  certificate_domain_name = local.domain_name
   route53_zone_id         = var.route53_zone_id
 
   # EFS

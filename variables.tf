@@ -41,6 +41,12 @@ variable "create_ui" {
 
 }
 
+variable "use_ssl_ui" {
+  type        = bool
+  description = "Create domain + certs for ssl connection to the UI."
+  default     = true
+}
+
 variable "text_generation_inference" {
   description = "Configuration for the text generation inference"
   type = object({

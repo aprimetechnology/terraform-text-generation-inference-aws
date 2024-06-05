@@ -31,10 +31,12 @@ No resources.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_alb"></a> [alb](#input\_alb) | Map of values passed to ALB module definition. See the [ALB module](https://github.com/terraform-aws-modules/terraform-aws-alb) for full list of supported arguments | `any` | `{}` | no |
+| <a name="input_alb_http_default_action"></a> [alb\_http\_default\_action](#input\_alb\_http\_default\_action) | Default action for ALB HTTP listener | `any` | <pre>{<br>  "forward": {<br>    "target_group_key": "open_webui"<br>  }<br>}</pre> | no |
 | <a name="input_alb_https_default_action"></a> [alb\_https\_default\_action](#input\_alb\_https\_default\_action) | Default action for ALB HTTPS listener | `any` | <pre>{<br>  "forward": {<br>    "target_group_key": "open_webui"<br>  }<br>}</pre> | no |
 | <a name="input_alb_security_group_id"></a> [alb\_security\_group\_id](#input\_alb\_security\_group\_id) | ID of an existing security group to attach to the ALB. Required if `create_alb` is `false` | `string` | `""` | no |
 | <a name="input_alb_subnets"></a> [alb\_subnets](#input\_alb\_subnets) | A list of subnets in which the ALB will be deployed. Required if `create_alb` is `true` | `list(string)` | `[]` | no |
 | <a name="input_alb_target_group_arn"></a> [alb\_target\_group\_arn](#input\_alb\_target\_group\_arn) | ARN of an existing ALB target group that will be used to route traffic to the OpenWebUi service. Required if `create_alb` is `false` | `string` | `""` | no |
+| <a name="input_alb_use_https"></a> [alb\_use\_https](#input\_alb\_use\_https) | Determines whether to use https for the alb. | `bool` | `true` | no |
 | <a name="input_certificate_arn"></a> [certificate\_arn](#input\_certificate\_arn) | ARN of an existing ACM certificate to use with the ALB. If not provided, a new certificate will be created. Required if `create_alb` is `true` and `create_certificate` is `false` | `string` | `""` | no |
 | <a name="input_certificate_domain_name"></a> [certificate\_domain\_name](#input\_certificate\_domain\_name) | Route53 domain name to use for ACM certificate. Route53 zone for this domain should be created in advance. | `string` | `""` | no |
 | <a name="input_cluster"></a> [cluster](#input\_cluster) | Map of values passed to ECS cluster module definition. See the [ECS cluster module](https://github.com/terraform-aws-modules/terraform-aws-ecs/tree/master/modules/cluster) for full list of supported arguments | `any` | `{}` | no |
@@ -64,6 +66,7 @@ No resources.
 
 | Name | Description |
 |------|-------------|
+| <a name="output_alb_dns_name"></a> [alb\_dns\_name](#output\_alb\_dns\_name) | The DNS name of the load balancer |
 | <a name="output_cluster_arn"></a> [cluster\_arn](#output\_cluster\_arn) | n/a |
 | <a name="output_ecs_service_security_group_id"></a> [ecs\_service\_security\_group\_id](#output\_ecs\_service\_security\_group\_id) | n/a |
 | <a name="output_service_name"></a> [service\_name](#output\_service\_name) | n/a |

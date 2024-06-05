@@ -9,3 +9,8 @@ output "service_name" {
 output "ecs_service_security_group_id" {
   value = module.ecs_service.security_group_id
 }
+
+output "alb_dns_name" {
+  description = "The DNS name of the load balancer"
+  value       = module.alb.dns_name
+}
