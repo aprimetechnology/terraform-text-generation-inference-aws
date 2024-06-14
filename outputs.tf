@@ -16,10 +16,10 @@ output "open_webui_ecs_service_security_group_id" {
 
 output "alb_dns_name" {
   description = "The DNS name of the load balancer"
-  value       = module.open_webui[0].alb_dns_name
+  value       = var.create_ui ? module.open_webui[0].alb_dns_name : null
 }
 
 output "ui_url" {
   description = "The UI url if a domain was given"
-  value       = var.use_ssl_ui ? local.domain_name : ""
+  value       = var.create_ui && var.use_ssl_ui ? local.domain_name : ""
 }

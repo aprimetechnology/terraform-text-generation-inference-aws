@@ -27,11 +27,13 @@ variable "availability_zones" {
 variable "text_generation_inference_discovery_name" {
   type        = string
   description = "Name of text-generation-inference used for service discovery"
+  default     = ""
 }
 
 variable "text_generation_inference_discovery_namespace" {
   type        = string
   description = "Namespace of text-generation-inference used for service discovery"
+  default     = ""
 }
 
 variable "create_ui" {
