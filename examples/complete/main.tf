@@ -8,10 +8,10 @@ locals {
   region = "us-east-2"
   name   = "text-generation-inference"
 
-  domain = "aprime.click"
-
-  vpc_cidr = "10.0.0.0/16"
-  azs      = slice(data.aws_availability_zones.available.names, 0, 3)
+  domain                         = "aprime.click"
+  text_generation_inference_port = 11434
+  vpc_cidr                       = "10.0.0.0/16"
+  azs                            = slice(data.aws_availability_zones.available.names, 0, 3)
 
   tags = {
     Name    = local.name
@@ -28,9 +28,13 @@ module "text_generation_inference" {
 
   name = local.name
 
-  text_generation_inference_version = "2.0.3"
-  instance_type                     = "g4dn.2xlarge"
-  quantize                          = "bitsandbytes"
+  text_generation_inference = {
+    port          = local.text_generation_inference_port
+    image_version = "2.0.3"
+  }
+  instance_type = "g4dn.2xlarge"
+  quantize      = "bitsandbytes"
+  create_ui     = false
 
   # ECS
   service = {
@@ -42,9 +46,10 @@ module "text_generation_inference" {
     enable_deletion_protection = false
   }
 
-  alb_subnets     = module.vpc.public_subnets
-  service_subnets = module.vpc.private_subnets
-  vpc_id          = module.vpc.vpc_id
+  alb_subnets        = module.vpc.public_subnets
+  service_subnets    = module.vpc.private_subnets
+  vpc_id             = module.vpc.vpc_id
+  availability_zones = local.azs
 
   # ECS
   use_spot_instances = true

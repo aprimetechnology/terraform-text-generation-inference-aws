@@ -11,8 +11,9 @@ locals {
 }
 
 module "open_webui" {
-  source = "./modules/terraform-open-webui-aws"
-  count  = var.create_ui ? 1 : 0
+  source     = "./modules/terraform-open-webui-aws"
+  count      = var.create_ui ? 1 : 0
+  depends_on = [module.ecs_service]
 
   name = local.name
 
