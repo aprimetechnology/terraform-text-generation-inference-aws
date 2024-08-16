@@ -128,7 +128,7 @@ module "ecs_service" {
   deployment_minimum_healthy_percent = try(var.service.deployment_minimum_healthy_percent, local.deployment_minimum_healthy_percent)
   desired_count                      = try(var.service.desired_count, 1)
   enable_ecs_managed_tags            = try(var.service.enable_ecs_managed_tags, true)
-  enable_execute_command             = try(var.service.enable_execute_command, false)
+  enable_execute_command             = try(var.service.enable_execute_command, true)
   force_new_deployment               = try(var.service.force_new_deployment, true)
   health_check_grace_period_seconds  = try(var.service.health_check_grace_period_seconds, null)
   launch_type                        = try(var.service.launch_type, "EC2")
