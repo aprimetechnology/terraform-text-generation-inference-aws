@@ -68,10 +68,12 @@ module "autoscaling" {
 
   instance_market_options = try(var.autoscaling.instance_market_options, var.use_spot_instances ?
     {
+      # due to a terraform bug, leaving `spot_options = {}` results in:
+      # - there *always* being a "diff" in this resource in terraform plan
+      # - this entire resource getting destroyed + re-created
+      # - all dependent resources (~10) being destroyed + re-created
+      # so we notably omit `spot_options` entirely, which prevents the bug
       market_type = "spot"
-      spot_options = {
-        tags = var.tags
-      }
   } : null)
 
   placement       = try(var.autoscaling.placement, {})
